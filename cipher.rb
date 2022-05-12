@@ -1,30 +1,61 @@
 # rubocop-disabled
 require 'pry'
 
-class CaesarCipher
-  def translate(string, shift)
-    shifted = []
+module UpperString
+  def is_upper? letter
+    letter == letter.upcase
+  end 
+end 
+
+class Word 
+  $alphabet_array = [*"a".."z"]
+
+  def display_alphabet
+    $alphabet_array
+  end
+
+  def shift_letter letter, shift, up = nil
+    current_index = $alphabet_array.index(letter.downcase)
+
+    if current_index + shift > 26
+      shifted_index = shift - ( 26 - current_index )
+      word = $alphabet_array[shifted_index]
+      up ? word.upcase : word
+    else 
+      word = $alphabet_array[current_index + shift]
+      up ? word.upcase : word
+    end 
+  end 
+end 
+
+class CaesarCipher < Word
+  include UpperString
+
+  def display
+    p display_alphabet
+  end
+
+  def translate(string, shift_by)
+    shifted_string = []
     array = string.chars
+    translated_string = ""
+    array.each do |unshift_letter|
+      ascii = unshift_letter.ord
 
-    array.each do |letter|
-      ascii = letter.ord
-
-      if ascii.between?(65, 90) 
-        ascii + shift > 90 ? shifted << 65 + (ascii + shift - 91) : shifted << ascii + shift
-      elsif  letter.ord.between?(97, 122)
-        ascii + shift > 122 ? shifted << 97 + (ascii + shift - 123) : shifted << ascii + shift
+      if ascii.between?(65, 90) || ascii.between?(97, 122)
+        up =  is_upper? unshift_letter
+        letter = shift_letter(unshift_letter, shift_by, up)
+        translated_string << letter
       else 
-        shifted << ascii
+        translated_string << unshift_letter
       end
     end
-    translated_string = ""
-    shifted.each { | l | translated_string << l.chr}
     p translated_string
   end
 end
 
 code = CaesarCipher.new
 
-code.translate('AaBbCc - DdEeFf', 10)
-code.translate('What a string!', 5)
-code.translate('', 5)
+
+code.translate "HeLlO World!", 5
+
